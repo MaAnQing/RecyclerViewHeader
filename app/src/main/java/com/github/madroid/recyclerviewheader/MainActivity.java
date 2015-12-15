@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.github.madroid.library.RecyclerViewHeader;
+
 import java.util.ArrayList;
 
 import static com.github.madroid.recyclerviewheader.R.id.recycler;
@@ -26,14 +28,14 @@ public class MainActivity extends AppCompatActivity {
         initRecycler();
     }
 
-    private void initData() {
-    }
-
     private void initRecycler() {
         mRecycler = (RecyclerView) findViewById(recycler);
         mRecycler.setHasFixedSize(true);
         mRecycler.setLayoutManager(new LinearLayoutManager(this));
         mRecycler.setAdapter(new MyAdapter());
+
+        RecyclerViewHeader header = RecyclerViewHeader.fromXml(this, R.layout.recycler_view_header) ;
+        header.attachTo(mRecycler);
 
     }
 
