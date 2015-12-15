@@ -16,7 +16,7 @@ import android.widget.Scroller;
 /**
  * created by madroid at 2015-12-04
  */
-public class RecyclerViewHeader extends LinearLayout {
+public class RecyclerViewHeader extends ViewGroup {
     private static final String TAG = "RecyclerViewHeader";
 
     private RecyclerView mRecyclerView;
@@ -25,7 +25,7 @@ public class RecyclerViewHeader extends LinearLayout {
     private ViewDragHelper mDragHelper;
     private Scroller mScroller;
     private int mTouchSlop;
-    private View mView ;
+    private View mView;
 
     public RecyclerViewHeader(Context context) {
         this(context, null);
@@ -38,7 +38,7 @@ public class RecyclerViewHeader extends LinearLayout {
     public RecyclerViewHeader(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
-        setOrientation(VERTICAL);
+        //setOrientation(VERTICAL);
         init();
     }
 
@@ -95,6 +95,38 @@ public class RecyclerViewHeader extends LinearLayout {
         return isIntercept;
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int height = 0;
+        int width = 0;
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            //测量子控件
+            View child = getChildAt(i);
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);
+            //获得子控件的高度和宽度
+            int childHeight = child.getMeasuredHeight();
+            int childWidth = child.getMeasuredWidth();
+            //得到最大宽度，并且累加高度
+            height += childHeight;
+            width = Math.max(childWidth, width);
+        }
+        height = View.resolveSize(height, heightMeasureSpec);
+        width = View.resolveSize(width, widthMeasureSpec);
+
+        setMeasuredDimension(width, height);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        int headerHeight = mHeaderView.getMeasuredHeight();
+
+        mHeaderView.layout(l, t, r, b);
+        mRecyclerView.layout(l, t + headerHeight, r, b);
+    }
+
     private boolean isInRecyclerView(float downX, float downY) {
         //Log.i("madroid", "isInRecyclerView x :" + downX + ", y:" + downY) ;
         int left = mRecyclerView.getLeft();
@@ -111,14 +143,6 @@ public class RecyclerViewHeader extends LinearLayout {
         return bottom <= 0;
     }
 
-//    private boolean isShouldIntercept(float rawX, float rawY) {
-//
-//
-//        if (mRecyclerView.getTop() <= 0) {
-//            return true ;
-//        }
-//
-//    }
 
     @Override
     public void computeScroll() {
