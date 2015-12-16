@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRecycler() {
         mRecycler = (RecyclerView) findViewById(recycler);
-        mRecycler.setHasFixedSize(true);
+        mRecycler.setHasFixedSize(false);
         mRecycler.setLayoutManager(new LinearLayoutManager(this));
         mRecycler.setAdapter(new MyAdapter());
 

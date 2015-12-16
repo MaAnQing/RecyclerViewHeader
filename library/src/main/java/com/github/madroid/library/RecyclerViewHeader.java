@@ -22,7 +22,7 @@ public class RecyclerViewHeader extends ViewGroup {
     private Context mContext;
     private ViewDragHelper mDragHelper;
     private int mTouchSlop;
-    private int mDragHeight ;
+    private int mDragHeight;
 
     public RecyclerViewHeader(Context context) {
         this(context, null);
@@ -145,14 +145,13 @@ public class RecyclerViewHeader extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Log.i(TAG, "onLayout") ;
+        Log.i(TAG, "onLayout");
         int headerHeight = mHeaderView.getMeasuredHeight();
-        mHeaderView.layout(l, t, r, b);
-        mRecyclerView.layout(l, t + headerHeight, r, b);
+        mHeaderView.layout(l, t + mDragHeight, r, b);
+        mRecyclerView.layout(l, t + headerHeight + mDragHeight, r, b);
     }
 
     private boolean isInRecyclerView(float downX, float downY) {
-        //Log.i("madroid", "isInRecyclerView x :" + downX + ", y:" + downY) ;
         int left = mRecyclerView.getLeft();
         int top = mRecyclerView.getTop();
         int right = mRecyclerView.getRight();
@@ -218,12 +217,9 @@ public class RecyclerViewHeader extends ViewGroup {
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
             super.onViewPositionChanged(changedView, left, top, dx, dy);
             Log.i(TAG, "onViewPositionChanged top:" + top + ", dy:" + dy);
-//            ViewGroup.LayoutParams params = mRecyclerView.getLayoutParams();
-//            params.height = params.height - dy ;
-//            mRecyclerView.setLayoutParams(params);
-            mRecyclerView.setTop(mHeaderView.getMeasuredHeight() + top);
-            //mDragHeight = top ;
-            invalidate();
+            //mRecyclerView.setTop(mHeaderView.getMeasuredHeight() + top);
+            mDragHeight = top;
+            mRecyclerView.requestLayout();
         }
     };
 }
