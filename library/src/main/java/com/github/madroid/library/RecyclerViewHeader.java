@@ -61,22 +61,32 @@ public class RecyclerViewHeader extends ViewGroup {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    public boolean onInterceptTouchEvent(MotionEvent event) {
 
         boolean isIntercept = false;
-        Log.i(TAG, "is recycler " + isInRecyclerView(ev.getX(), ev.getY()));
-
-        switch (ev.getAction()) {
+        Log.i(TAG, "recycler top : " + mRecyclerView.getTop());
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                Log.i(TAG, "[ -- onInterceptTouchEvent ACTION_DOWN -- ]");
                 isIntercept = false;
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                isIntercept = mDragHelper.shouldInterceptTouchEvent(ev);
+                Log.i(TAG, "[--- onInterceptTouchEvent ACTION_MOVE -- ]");
+                if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
+                    isIntercept = true;
+                    mDragHelper.captureChildView(mRecyclerView, 0);
+                } else {
+                    isIntercept = false;
+                }
+                Log.i(TAG, "isIntercept : " + isIntercept);
 
                 break;
 
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                Log.i(TAG, "[ -- onInterceptTouchEvent ACTION_UP -- ]");
+                mDragHelper.cancel();
                 isIntercept = false;
                 break;
 
@@ -84,8 +94,22 @@ public class RecyclerViewHeader extends ViewGroup {
                 break;
         }
 
-        return isIntercept;
+        return isIntercept || mDragHelper.shouldInterceptTouchEvent(event);
     }
+//
+//    private boolean isShouldIntercept(MotionEvent event) {
+//        boolean isIntercept = false;
+//        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+//            if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
+//                isIntercept = true;
+//                mDragHelper.shouldInterceptTouchEvent(event);
+//            } else {
+//                isIntercept = false;
+//            }
+//        }
+//
+//        return isIntercept;
+//    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -94,25 +118,27 @@ public class RecyclerViewHeader extends ViewGroup {
         onTouch = true;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                Log.i(TAG, "[ == onTouchEvent ACTION_DOWN == ]");
                 break;
 
             case MotionEvent.ACTION_MOVE:
-
+                Log.i(TAG, "[ == onTouchEvent ACTION_MOVE == ]");
                 break;
 
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                Log.i(TAG, "[ == onTouchEvent ACTION_UP ==]");
                 break;
 
             default:
                 break;
         }
-        return onTouch;
+        return true;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Log.i(TAG, "onMeasure");
         int height = getPaddingTop() + getPaddingBottom();
         int width = getPaddingLeft() + getPaddingRight();
         int count = getChildCount();
@@ -145,7 +171,6 @@ public class RecyclerViewHeader extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Log.i(TAG, "onLayout");
         int headerHeight = mHeaderView.getMeasuredHeight();
         mHeaderView.layout(l, t + mDragHeight, r, b);
         mRecyclerView.layout(l, t + headerHeight + mDragHeight, r, b);
@@ -171,9 +196,16 @@ public class RecyclerViewHeader extends ViewGroup {
     private ViewDragHelper.Callback mDragCallback = new ViewDragHelper.Callback() {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            Log.i("madroid", "view:" + child.getId() + "; pointerId:" + pointerId);
+            Log.i(TAG, "tryCaptureView view:" + child.getId() + "; pointerId:" + pointerId);
 
-            return true;
+            return child == mHeaderView;
+        }
+
+        @Override
+        public void onViewCaptured(View capturedChild, int activePointerId) {
+            super.onViewCaptured(capturedChild, activePointerId);
+            Log.i(TAG, "onViewCaptured view:" + capturedChild.getId() + "; pointerId:" + activePointerId);
+
         }
 
         @Override
@@ -188,29 +220,21 @@ public class RecyclerViewHeader extends ViewGroup {
                     newTop = top;
                 }
 
-            } else {
-                newTop = 0;
+            } else if (child == mRecyclerView){
+                if (top >= 0) {
+                    if (top >= mHeaderView.getMeasuredHeight()) {
+                        newTop = mHeaderView.getMeasuredHeight();
+                    }else {
+                        newTop = top;
+                    }
+                }else {
+                    newTop = 0 ;
+                }
+            }else {
+                newTop = top ;
             }
 
             return newTop;
-        }
-
-
-        @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            //mDragHelper.settleCapturedViewAt(0, 0);
-            mDragHelper.flingCapturedView(0, - mHeaderView.getMeasuredHeight(), 0, 0);
-            postInvalidate();
-        }
-
-        @Override
-        public void onViewDragStateChanged(int state) {
-            super.onViewDragStateChanged(state);
-        }
-
-        @Override
-        public void onViewCaptured(View capturedChild, int activePointerId) {
-            super.onViewCaptured(capturedChild, activePointerId);
         }
 
         @Override
@@ -220,13 +244,38 @@ public class RecyclerViewHeader extends ViewGroup {
             //mRecyclerView.setTop(mHeaderView.getMeasuredHeight() + top);
             if (changedView == mHeaderView) {
                 if (top > 0) {
-                    mDragHeight = 0 ;
-                }else {
-                    mDragHeight = top ;
+                    mDragHeight = 0;
+                } else {
+                    mDragHeight = top;
+                }
+            }else if (changedView == mRecyclerView) {
+                if (top > 0) {
+                    mDragHeight = top - mHeaderView.getMeasuredHeight();
+                } else {
+                    mDragHeight = 0 - mHeaderView.getMeasuredHeight() ;
                 }
             }
             //mDragHeight = top;
             mRecyclerView.requestLayout();
         }
+
+
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            //mDragHelper.settleCapturedViewAt(0, 0);
+            Log.i(TAG, "releasedChild : " + releasedChild.getId()) ;
+            if (releasedChild == mHeaderView) {
+                mDragHelper.flingCapturedView(0, -mHeaderView.getMeasuredHeight(), 0, 0);
+            }else if (releasedChild == mRecyclerView) {
+                //mDragHelper.flingCapturedView(0, 0, 0, mHeaderView.getMeasuredHeight());
+            }
+            ViewCompat.postInvalidateOnAnimation(RecyclerViewHeader.this);
+        }
+
+        @Override
+        public void onViewDragStateChanged(int state) {
+            super.onViewDragStateChanged(state);
+        }
+
     };
 }
