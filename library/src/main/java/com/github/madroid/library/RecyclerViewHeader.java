@@ -198,9 +198,9 @@ public class RecyclerViewHeader extends ViewGroup {
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            mDragHelper.settleCapturedViewAt(0, 0);
-            //mDragHelper.flingCapturedView(0, 0, 0, mHeaderView.getMeasuredHeight());
-
+            //mDragHelper.settleCapturedViewAt(0, 0);
+            mDragHelper.flingCapturedView(0, - mHeaderView.getMeasuredHeight(), 0, 0);
+            postInvalidate();
         }
 
         @Override
@@ -218,7 +218,14 @@ public class RecyclerViewHeader extends ViewGroup {
             super.onViewPositionChanged(changedView, left, top, dx, dy);
             Log.i(TAG, "onViewPositionChanged top:" + top + ", dy:" + dy);
             //mRecyclerView.setTop(mHeaderView.getMeasuredHeight() + top);
-            mDragHeight = top;
+            if (changedView == mHeaderView) {
+                if (top > 0) {
+                    mDragHeight = 0 ;
+                }else {
+                    mDragHeight = top ;
+                }
+            }
+            //mDragHeight = top;
             mRecyclerView.requestLayout();
         }
     };
