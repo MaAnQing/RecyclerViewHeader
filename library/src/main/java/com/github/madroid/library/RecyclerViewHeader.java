@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 /**
@@ -22,7 +21,6 @@ public class RecyclerViewHeader extends ViewGroup {
     private ViewGroup mHeaderView;
     private Context mContext;
     private ViewDragHelper mDragHelper;
-    private int mTouchSlop;
     private int mDragHeight;
 
     public RecyclerViewHeader(Context context) {
@@ -47,7 +45,6 @@ public class RecyclerViewHeader extends ViewGroup {
 
     private void init() {
         mDragHelper = ViewDragHelper.create(this, 1.0f, mDragCallback);
-        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
     }
 
     public void attachTo(RecyclerView recyclerView) {
@@ -67,7 +64,6 @@ public class RecyclerViewHeader extends ViewGroup {
     public boolean onInterceptTouchEvent(MotionEvent event) {
 
         boolean isIntercept = false;
-        Log.i(TAG, "recycler top : " + mRecyclerView.getTop());
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 Log.i(TAG, "[ -- onInterceptTouchEvent ACTION_DOWN -- ]");
@@ -77,19 +73,16 @@ public class RecyclerViewHeader extends ViewGroup {
 
             case MotionEvent.ACTION_MOVE:
                 Log.i(TAG, "[--- onInterceptTouchEvent ACTION_MOVE -- ]");
-
                 int dy = (int) event.getY() - startY ;
                 if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
                 } else if(isInRecyclerView(event.getX(), event.getY()) && isScrollToTop() && dy > 0) {
-                    Log.i(TAG, "on the top") ;
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
                 }else {
                     isIntercept = false ;
                 }
-                Log.i(TAG, "isIntercept : " + isIntercept);
 
                 break;
 
@@ -119,26 +112,7 @@ public class RecyclerViewHeader extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean onTouch;
         mDragHelper.processTouchEvent(event);
-        onTouch = true;
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                Log.i(TAG, "[ == onTouchEvent ACTION_DOWN == ]");
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                Log.i(TAG, "[ == onTouchEvent ACTION_MOVE == ]");
-                break;
-
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                Log.i(TAG, "[ == onTouchEvent ACTION_UP ==]");
-                break;
-
-            default:
-                break;
-        }
         return true;
     }
 
@@ -247,7 +221,6 @@ public class RecyclerViewHeader extends ViewGroup {
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
             super.onViewPositionChanged(changedView, left, top, dx, dy);
             Log.i(TAG, "onViewPositionChanged top:" + top + ", dy:" + dy);
-            //mRecyclerView.setTop(mHeaderView.getMeasuredHeight() + top);
             if (changedView == mHeaderView) {
                 if (top > 0) {
                     mDragHeight = 0;
@@ -261,7 +234,6 @@ public class RecyclerViewHeader extends ViewGroup {
                     mDragHeight = 0 - mHeaderView.getMeasuredHeight() ;
                 }
             }
-            //mDragHeight = top;
             mRecyclerView.requestLayout();
         }
 
@@ -276,11 +248,6 @@ public class RecyclerViewHeader extends ViewGroup {
                 mDragHelper.flingCapturedView(0, 0, 0, mHeaderView.getMeasuredHeight());
             }
             ViewCompat.postInvalidateOnAnimation(RecyclerViewHeader.this);
-        }
-
-        @Override
-        public void onViewDragStateChanged(int state) {
-            super.onViewDragStateChanged(state);
         }
 
     };
