@@ -1,12 +1,21 @@
 package com.github.madroid.recyclerviewheader;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.madroid.library.RecyclerViewHeader;
 
@@ -18,13 +27,14 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mRecycler ;
     private ArrayList<String> mList ;
+    private ViewPager mViewPager ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initRecycler();
+        setupView();
     }
 
     private void initRecycler() {
@@ -36,6 +46,14 @@ public class MainActivity extends AppCompatActivity {
         RecyclerViewHeader header = RecyclerViewHeader.fromXml(this, R.layout.recycler_view_header) ;
         header.attachTo(mRecycler);
 
+
+    }
+
+    private void setupView() {
+        initRecycler();
+
+        mViewPager = (ViewPager) findViewById(R.id.viewpager) ;
+        mViewPager.setAdapter(new RecyclerFragmentPagerAdapter(getSupportFragmentManager()));
 
     }
 
@@ -66,6 +84,52 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return 50;
+        }
+    }
+
+    private class RecyclerFragmentPagerAdapter extends FragmentStatePagerAdapter {
+
+        public RecyclerFragmentPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    return RecyclerHeaderFragment.newInstance();
+                case 1:
+                    return RecyclerHeaderFragment.newInstance();
+                case 2:
+                    return RecyclerHeaderFragment.newInstance();
+                default:
+                    return RecyclerHeaderFragment.newInstance();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 4;
+        }
+    }
+
+    private static class RecyclerHeaderFragment extends Fragment {
+
+        static RecyclerHeaderFragment newInstance() {
+            return new RecyclerHeaderFragment() ;
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_recycler_header, null, false) ;
+            view.findViewById(R.id.header).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "Header View", Toast.LENGTH_LONG).show() ;
+                }
+            });
+            return view ;
         }
     }
 }
