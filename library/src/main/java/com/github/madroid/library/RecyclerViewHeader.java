@@ -273,7 +273,7 @@ public class RecyclerViewHeader extends ViewGroup {
             if (releasedChild == mHeaderView) {
                 mDragHelper.flingCapturedView(0, -mHeaderView.getMeasuredHeight(), 0, 0);
             }else if (releasedChild == mRecyclerView) {
-                //mDragHelper.flingCapturedView(0, 0, 0, mHeaderView.getMeasuredHeight());
+                mDragHelper.flingCapturedView(0, 0, 0, mHeaderView.getMeasuredHeight());
             }
             ViewCompat.postInvalidateOnAnimation(RecyclerViewHeader.this);
         }
