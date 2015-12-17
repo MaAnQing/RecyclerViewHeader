@@ -59,6 +59,7 @@ public class RecyclerViewHeader extends ViewGroup {
     }
 
     int startY = 0;
+    int startX = 0;
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
@@ -68,20 +69,25 @@ public class RecyclerViewHeader extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 Log.i(TAG, "[ -- onInterceptTouchEvent ACTION_DOWN -- ]");
                 isIntercept = false;
+                startX = (int) event.getX() ;
                 startY = (int) event.getY();
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 Log.i(TAG, "[--- onInterceptTouchEvent ACTION_MOVE -- ]");
                 int dy = (int) event.getY() - startY;
+                int dx = (int) event.getX() - startX ;
                 if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
                 } else if (isInRecyclerView(event.getX(), event.getY()) && isScrollToTop() && dy > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
-                } else {
-                    isIntercept = false;
+                } else if (!isInRecyclerView(event.getX(), event.getY()) && Math.abs(dy) > Math.abs(dx)){
+                    mDragHelper.captureChildView(mHeaderView, 0);
+                    isIntercept = true;
+                }else {
+                    isIntercept = false ;
                 }
 
                 break;
@@ -177,7 +183,7 @@ public class RecyclerViewHeader extends ViewGroup {
         public boolean tryCaptureView(View child, int pointerId) {
             //Log.i(TAG, "tryCaptureView view:" + child.getId() + "; pointerId:" + pointerId);
 
-            return child == mHeaderView;
+            return true;
         }
 
         @Override
