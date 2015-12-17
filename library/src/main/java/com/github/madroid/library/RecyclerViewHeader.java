@@ -3,6 +3,7 @@ package com.github.madroid.library;
 import android.content.Context;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -60,6 +61,8 @@ public class RecyclerViewHeader extends ViewGroup {
 
     }
 
+    int startY = 0 ;
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
 
@@ -69,15 +72,22 @@ public class RecyclerViewHeader extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 Log.i(TAG, "[ -- onInterceptTouchEvent ACTION_DOWN -- ]");
                 isIntercept = false;
+                startY = (int) event.getY() ;
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 Log.i(TAG, "[--- onInterceptTouchEvent ACTION_MOVE -- ]");
+
+                int dy = (int) event.getY() - startY ;
                 if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
-                } else {
-                    isIntercept = false;
+                } else if(isInRecyclerView(event.getX(), event.getY()) && isScrollToTop() && dy > 0) {
+                    Log.i(TAG, "on the top") ;
+                    isIntercept = true;
+                    mDragHelper.captureChildView(mRecyclerView, 0);
+                }else {
+                    isIntercept = false ;
                 }
                 Log.i(TAG, "isIntercept : " + isIntercept);
 
@@ -96,20 +106,16 @@ public class RecyclerViewHeader extends ViewGroup {
 
         return isIntercept || mDragHelper.shouldInterceptTouchEvent(event);
     }
-//
-//    private boolean isShouldIntercept(MotionEvent event) {
-//        boolean isIntercept = false;
-//        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//            if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
-//                isIntercept = true;
-//                mDragHelper.shouldInterceptTouchEvent(event);
-//            } else {
-//                isIntercept = false;
-//            }
-//        }
-//
-//        return isIntercept;
-//    }
+
+    private boolean isScrollToTop() {
+        boolean isTop = false;
+        RecyclerView.LayoutManager manager = mRecyclerView.getLayoutManager();
+        if (manager instanceof LinearLayoutManager) {
+            isTop = ((LinearLayoutManager) manager).findFirstCompletelyVisibleItemPosition() == 0 ;
+        }
+
+        return isTop ;
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -196,7 +202,7 @@ public class RecyclerViewHeader extends ViewGroup {
     private ViewDragHelper.Callback mDragCallback = new ViewDragHelper.Callback() {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            Log.i(TAG, "tryCaptureView view:" + child.getId() + "; pointerId:" + pointerId);
+            //Log.i(TAG, "tryCaptureView view:" + child.getId() + "; pointerId:" + pointerId);
 
             return child == mHeaderView;
         }
@@ -204,13 +210,13 @@ public class RecyclerViewHeader extends ViewGroup {
         @Override
         public void onViewCaptured(View capturedChild, int activePointerId) {
             super.onViewCaptured(capturedChild, activePointerId);
-            Log.i(TAG, "onViewCaptured view:" + capturedChild.getId() + "; pointerId:" + activePointerId);
+            //Log.i(TAG, "onViewCaptured view:" + capturedChild.getId() + "; pointerId:" + activePointerId);
 
         }
 
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
-            Log.i(TAG, "clampViewPositionVertical child :" + child.getId() + ", top:" + top + ", dy:" + dy);
+            //Log.i(TAG, "clampViewPositionVertical child :" + child.getId() + ", top:" + top + ", dy:" + dy);
             int newTop;
 
             if (child == mHeaderView) {
