@@ -7,8 +7,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,14 +35,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        initData() ;
         setupView();
+    }
+
+    private void initData() {
+
+        mList = new ArrayList<>() ;
+        for (int i = 0; i < 100; i++) {
+            mList.add("item : " + i);
+        }
     }
 
     private void initRecycler() {
         mRecycler = (RecyclerView) findViewById(recycler);
         mRecycler.setHasFixedSize(false);
-        mRecycler.setLayoutManager(new LinearLayoutManager(this));
+        mRecycler.setLayoutManager(new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL));
         mRecycler.setAdapter(new MyAdapter());
 
         RecyclerViewHeader header = RecyclerViewHeader.fromXml(this, R.layout.recycler_view_header) ;
@@ -78,12 +88,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyViewHolder holder, int position) {
-           // holder.item.setText();
+           holder.item.setText(mList.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return 50;
+            return mList.size();
         }
     }
 

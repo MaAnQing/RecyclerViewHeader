@@ -5,6 +5,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -111,8 +112,19 @@ public class RecyclerViewHeader extends ViewGroup {
         RecyclerView.LayoutManager manager = mRecyclerView.getLayoutManager();
         if (manager instanceof LinearLayoutManager) {
             isTop = ((LinearLayoutManager) manager).findFirstCompletelyVisibleItemPosition() == 0;
+        }else if (manager instanceof StaggeredGridLayoutManager) {
+            int spanCount = ((StaggeredGridLayoutManager) manager).getSpanCount() ;
+            int into[] = new int[spanCount] ;
+            int result[] = ((StaggeredGridLayoutManager) manager).findFirstCompletelyVisibleItemPositions(into) ;
+            for (int i = 0; i < spanCount; i++) {
+                if (i != result[i]) {
+                    return false ;
+                }else {
+                    isTop = true ;
+                }
+            }
         }
-
+        Log.i(TAG, "isScrollToTop : " + isTop) ;
         return isTop;
     }
 
