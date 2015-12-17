@@ -55,10 +55,10 @@ public class RecyclerViewHeader extends ViewGroup {
         parent.addView(this);
 
         mHeaderView = (ViewGroup) this.getChildAt(0);
-
+        //setBackgroundColor(mContext.getResources().getColor(android.R.color.holo_blue_light));
     }
 
-    int startY = 0 ;
+    int startY = 0;
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
@@ -68,20 +68,20 @@ public class RecyclerViewHeader extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 Log.i(TAG, "[ -- onInterceptTouchEvent ACTION_DOWN -- ]");
                 isIntercept = false;
-                startY = (int) event.getY() ;
+                startY = (int) event.getY();
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 Log.i(TAG, "[--- onInterceptTouchEvent ACTION_MOVE -- ]");
-                int dy = (int) event.getY() - startY ;
+                int dy = (int) event.getY() - startY;
                 if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
-                } else if(isInRecyclerView(event.getX(), event.getY()) && isScrollToTop() && dy > 0) {
+                } else if (isInRecyclerView(event.getX(), event.getY()) && isScrollToTop() && dy > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
-                }else {
-                    isIntercept = false ;
+                } else {
+                    isIntercept = false;
                 }
 
                 break;
@@ -104,10 +104,10 @@ public class RecyclerViewHeader extends ViewGroup {
         boolean isTop = false;
         RecyclerView.LayoutManager manager = mRecyclerView.getLayoutManager();
         if (manager instanceof LinearLayoutManager) {
-            isTop = ((LinearLayoutManager) manager).findFirstCompletelyVisibleItemPosition() == 0 ;
+            isTop = ((LinearLayoutManager) manager).findFirstCompletelyVisibleItemPosition() == 0;
         }
 
-        return isTop ;
+        return isTop;
     }
 
     @Override
@@ -170,7 +170,6 @@ public class RecyclerViewHeader extends ViewGroup {
         if (mDragHelper.continueSettling(true)) {
             ViewCompat.postInvalidateOnAnimation(this);
         }
-
     }
 
     private ViewDragHelper.Callback mDragCallback = new ViewDragHelper.Callback() {
@@ -200,18 +199,18 @@ public class RecyclerViewHeader extends ViewGroup {
                     newTop = top;
                 }
 
-            } else if (child == mRecyclerView){
+            } else if (child == mRecyclerView) {
                 if (top >= 0) {
                     if (top >= mHeaderView.getMeasuredHeight()) {
                         newTop = mHeaderView.getMeasuredHeight();
-                    }else {
+                    } else {
                         newTop = top;
                     }
-                }else {
-                    newTop = 0 ;
+                } else {
+                    newTop = 0;
                 }
-            }else {
-                newTop = top ;
+            } else {
+                newTop = top;
             }
 
             return newTop;
@@ -227,24 +226,24 @@ public class RecyclerViewHeader extends ViewGroup {
                 } else {
                     mDragHeight = top;
                 }
-            }else if (changedView == mRecyclerView) {
+            } else if (changedView == mRecyclerView) {
                 if (top > 0) {
                     mDragHeight = top - mHeaderView.getMeasuredHeight();
                 } else {
-                    mDragHeight = 0 - mHeaderView.getMeasuredHeight() ;
+                    mDragHeight = 0 - mHeaderView.getMeasuredHeight();
                 }
             }
-            mRecyclerView.requestLayout();
+            requestLayout();
         }
 
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
             //mDragHelper.settleCapturedViewAt(0, 0);
-            Log.i(TAG, "releasedChild : " + releasedChild.getId()) ;
+            Log.i(TAG, "releasedChild : " + releasedChild.getId());
             if (releasedChild == mHeaderView) {
                 mDragHelper.flingCapturedView(0, -mHeaderView.getMeasuredHeight(), 0, 0);
-            }else if (releasedChild == mRecyclerView) {
+            } else if (releasedChild == mRecyclerView) {
                 mDragHelper.flingCapturedView(0, 0, 0, mHeaderView.getMeasuredHeight());
             }
             ViewCompat.postInvalidateOnAnimation(RecyclerViewHeader.this);

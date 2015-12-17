@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         initRecycler();
     }
 
@@ -36,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerViewHeader header = RecyclerViewHeader.fromXml(this, R.layout.recycler_view_header) ;
         header.attachTo(mRecycler);
+
 
     }
 
