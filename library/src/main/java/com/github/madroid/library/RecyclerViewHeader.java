@@ -70,25 +70,25 @@ public class RecyclerViewHeader extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 Log.i(TAG, "[ -- onInterceptTouchEvent ACTION_DOWN -- ]");
                 isIntercept = false;
-                startX = (int) event.getX() ;
+                startX = (int) event.getX();
                 startY = (int) event.getY();
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 Log.i(TAG, "[--- onInterceptTouchEvent ACTION_MOVE -- ]");
                 int dy = (int) event.getY() - startY;
-                int dx = (int) event.getX() - startX ;
+                int dx = (int) event.getX() - startX;
                 if (isInRecyclerView(event.getX(), event.getY()) && mRecyclerView.getTop() > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
                 } else if (isInRecyclerView(event.getX(), event.getY()) && isScrollToTop() && dy > 0) {
                     isIntercept = true;
                     mDragHelper.captureChildView(mRecyclerView, 0);
-                } else if (!isInRecyclerView(event.getX(), event.getY()) && Math.abs(dy) > Math.abs(dx)){
+                } else if (!isInRecyclerView(event.getX(), event.getY()) && Math.abs(dy) > Math.abs(dx)) {
                     mDragHelper.captureChildView(mHeaderView, 0);
                     isIntercept = true;
-                }else {
-                    isIntercept = false ;
+                } else {
+                    isIntercept = false;
                 }
 
                 break;
@@ -109,23 +109,33 @@ public class RecyclerViewHeader extends ViewGroup {
 
     private boolean isScrollToTop() {
         boolean isTop = false;
-        RecyclerView.LayoutManager manager = mRecyclerView.getLayoutManager();
-        if (manager instanceof LinearLayoutManager) {
-            isTop = ((LinearLayoutManager) manager).findFirstCompletelyVisibleItemPosition() == 0;
-        }else if (manager instanceof StaggeredGridLayoutManager) {
-            int spanCount = ((StaggeredGridLayoutManager) manager).getSpanCount() ;
-            int into[] = new int[spanCount] ;
-            int result[] = ((StaggeredGridLayoutManager) manager).findFirstCompletelyVisibleItemPositions(into) ;
-            for (int i = 0; i < spanCount; i++) {
-                if (i != result[i]) {
-                    return false ;
-                }else {
-                    isTop = true ;
+
+        if (getRecyclerViewItemCount() != 0) {
+
+            RecyclerView.LayoutManager manager = mRecyclerView.getLayoutManager();
+            if (manager instanceof LinearLayoutManager) {
+                isTop = ((LinearLayoutManager) manager).findFirstCompletelyVisibleItemPosition() == 0;
+            } else if (manager instanceof StaggeredGridLayoutManager) {
+                int spanCount = ((StaggeredGridLayoutManager) manager).getSpanCount();
+                int into[] = new int[spanCount];
+                int result[] = ((StaggeredGridLayoutManager) manager).findFirstCompletelyVisibleItemPositions(into);
+                for (int i = 0; i < spanCount; i++) {
+                    if (i != result[i]) {
+                        return false;
+                    } else {
+                        isTop = true;
+                    }
                 }
             }
+        } else {
+            isTop = true;
         }
-        Log.i(TAG, "isScrollToTop : " + isTop) ;
+        Log.i(TAG, "isScrollToTop : " + isTop);
         return isTop;
+    }
+
+    private int getRecyclerViewItemCount() {
+        return mRecyclerView.getAdapter().getItemCount();
     }
 
     @Override
